@@ -17,8 +17,10 @@ import javax.imageio.ImageIO;
 
 public class WunderPahkina {
 
-	private static final String IMAGE_LOCATION_IN_CLASSPATH = "/kuva.png";
-	private static final Integer COLOR_BLACK = new Color(0, 0, 0).getRGB();
+	private static final String IMAGE_LOCATION = "src/main/resources/kuva.png";
+	private static final String RESULT_LOCATION = "src/main/resources/%d.png";
+	
+	private static final Integer COLOR_RED = new Color(120, 0, 0).getRGB();
 	private static final Integer COLOR_WHITE = new Color(255, 255, 255).getRGB();
 	private static final Integer COLOR_START_UP = new Color(7, 84, 19).getRGB(); 
 	private static final Integer COLOR_START_LEFT = new Color(139, 57, 137).getRGB(); 
@@ -28,16 +30,15 @@ public class WunderPahkina {
 
 	public static void main(String[] args) throws Exception {
 		long time = currentTimeMillis();
-		
-		String result = format("src/main/resources/%d.png", time);
+		String result = format(RESULT_LOCATION, time);
 		
 		ImageIO.write(
 				processImage(
-						ImageIO.read(WunderPahkina.class.getResourceAsStream(IMAGE_LOCATION_IN_CLASSPATH))), 
+						ImageIO.read(new File(IMAGE_LOCATION))), 
 						"png", 
 						new File(result));
 		
-		System.out.println(format("The result is saved to %s. The operation took %d ms.", result, currentTimeMillis()-time));
+		System.out.println(format("The result is saved to %s. The operation took %d ms.", result, currentTimeMillis() - time));
 	}
 	
 	public static BufferedImage processImage(BufferedImage image) {
@@ -52,15 +53,15 @@ public class WunderPahkina {
 		pixelsByColor.get(COLOR_START_UP).forEach(pixel -> draw(pixel, allPixels, image, Direction.UP));
 		pixelsByColor.get(COLOR_START_LEFT).forEach(pixel -> draw(pixel, allPixels, image, Direction.LEFT));
 			
-		allPixels.stream().filter(pixel -> pixel.color != COLOR_BLACK)
+		allPixels.stream().filter(pixel -> pixel.color != COLOR_RED)
 			.forEach(pixel -> image.setRGB(pixel.x, pixel.y, COLOR_WHITE));
 		
 		return image;
 	}
 	
 	private static void draw(Pixel p, List<Pixel> allPixels, BufferedImage bufferedImage, Direction direction){
-		bufferedImage.setRGB(p.x, p.y, COLOR_BLACK);
-		p.color = COLOR_BLACK;
+		bufferedImage.setRGB(p.x, p.y, COLOR_RED);
+		p.color = COLOR_RED;
 		
 		if(direction == Direction.STOP)
 			return;
@@ -75,15 +76,15 @@ public class WunderPahkina {
 			});
 	}
 	
-	private static Direction direction(Pixel pixel, Direction current){
+	private static Direction direction(Pixel pixel, Direction currentDirection){
 		if(pixel.color == COLOR_STOP || pixel.color == COLOR_START_LEFT || pixel.color == COLOR_START_UP){
 			return Direction.STOP;
 		} else if(pixel.color == COLOR_TURN_RIGHT){
-			return Direction.turnRightFrom(current);
+			return Direction.turnRightFrom(currentDirection);
 		} else if(pixel.color == COLOR_TURN_LEFT){
-			return Direction.turnLeftFrom(current);
+			return Direction.turnLeftFrom(currentDirection);
 		}
-		return current;
+		return currentDirection;
 	}
 	
 	public enum Direction {
