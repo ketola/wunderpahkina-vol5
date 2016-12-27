@@ -14,5 +14,5 @@ https://github.com/ketola/wunderpahkina-vol5/blob/master/src/main/java/ketola/wu
 
 ..and this is the result after running the code:
 
-![Alt](https://raw.githubusercontent.com/ketola/wunderpahkina-vol5/master/src/main/resources/1482864663180.png "the Solution")
+![Alt](https://raw.githubusercontent.com/ketola/wunderpahkina-vol5/master/src/main/resources/solution.png "the Solution")
 
