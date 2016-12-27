@@ -17,9 +17,6 @@ import javax.imageio.ImageIO;
 
 public class WunderPahkina {
 
-	private static final String IMAGE_LOCATION = "src/main/resources/kuva.png";
-	private static final String RESULT_LOCATION = "src/main/resources/%d.png";
-	
 	private static final Integer COLOR_RED = new Color(120, 0, 0).getRGB();
 	private static final Integer COLOR_WHITE = new Color(255, 255, 255).getRGB();
 	private static final Integer COLOR_START_UP = new Color(7, 84, 19).getRGB(); 
@@ -30,15 +27,10 @@ public class WunderPahkina {
 
 	public static void main(String[] args) throws Exception {
 		long time = currentTimeMillis();
-		String result = format(RESULT_LOCATION, time);
 		
-		ImageIO.write(
-				processImage(
-						ImageIO.read(new File(IMAGE_LOCATION))), 
-						"png", 
-						new File(result));
+		ImageIO.write(processImage(ImageIO.read(new File("src/main/resources/kuva.png"))), "png", new File("src/main/resources/solution.png"));
 		
-		System.out.println(format("The result is saved to %s. The operation took %d ms.", result, currentTimeMillis() - time));
+		System.out.println(format("The result is saved to src/main/resources/solution.png. The operation took %d ms.", currentTimeMillis() - time));
 	}
 	
 	public static BufferedImage processImage(BufferedImage image) {
@@ -66,22 +58,17 @@ public class WunderPahkina {
 		if(direction == Direction.STOP)
 			return;
 		
-		final int x = direction.newX(p.x);
-		final int y = direction.newY(p.y);
-	
-		allPixels.stream().filter(pixel -> (pixel.x == x && pixel.y == y))
+		allPixels.stream().filter(pixel -> (pixel.x == direction.newX(p.x) && pixel.y == direction.newY(p.y)))
 			.limit(1)
-			.forEach(pixel -> {
-				draw(pixel, allPixels, bufferedImage, direction(pixel, direction));
-			});
+			.forEach(pixel -> draw(pixel, allPixels, bufferedImage, direction(pixel.color, direction)));
 	}
 	
-	private static Direction direction(Pixel pixel, Direction currentDirection){
-		if(pixel.color == COLOR_STOP || pixel.color == COLOR_START_LEFT || pixel.color == COLOR_START_UP){
+	private static Direction direction(int color, Direction currentDirection){
+		if(color == COLOR_STOP || color == COLOR_START_LEFT || color == COLOR_START_UP){
 			return Direction.STOP;
-		} else if(pixel.color == COLOR_TURN_RIGHT){
+		} else if(color == COLOR_TURN_RIGHT){
 			return Direction.turnRightFrom(currentDirection);
-		} else if(pixel.color == COLOR_TURN_LEFT){
+		} else if(color == COLOR_TURN_LEFT){
 			return Direction.turnLeftFrom(currentDirection);
 		}
 		return currentDirection;
