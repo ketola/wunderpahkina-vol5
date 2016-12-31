@@ -1,9 +1,9 @@
 package ketola.wunderpahkina.vol5;
 
+import static java.lang.Math.random;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
@@ -11,14 +11,14 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
 
 public class WunderPahkina {
-
+	
+	private static final Integer COLOR_SNOW = new Color(255, 255, 255).getRGB();
+	private static final Integer COLOR_SKY = new Color(204, 229, 255).getRGB();
 	private static final Integer COLOR_RED = new Color(120, 0, 0).getRGB();
-	private static final Integer COLOR_WHITE = new Color(255, 255, 255).getRGB();
 	private static final Integer COLOR_START_UP = new Color(7, 84, 19).getRGB(); 
 	private static final Integer COLOR_START_LEFT = new Color(139, 57, 137).getRGB(); 
 	private static final Integer COLOR_STOP = new Color(51, 69, 169).getRGB(); 
@@ -34,33 +34,30 @@ public class WunderPahkina {
 	}
 	
 	public static BufferedImage processImage(BufferedImage image) {
-		List<Pixel> allPixels = range(0, image.getHeight() * image.getWidth())
-			.mapToObj(idx -> 
-				{	int x = idx % image.getWidth();  
-					int y = idx / image.getWidth();
-					return new Pixel(x, y, image.getRGB(x, y));
-				}).collect(toList());
+		int w = image.getWidth();
 		
-		Map<Integer, List<Pixel>> pixelsByColor = allPixels.stream().collect(groupingBy(Pixel::color));
-		pixelsByColor.get(COLOR_START_UP).forEach(pixel -> draw(pixel, allPixels, image, Direction.UP));
-		pixelsByColor.get(COLOR_START_LEFT).forEach(pixel -> draw(pixel, allPixels, image, Direction.LEFT));
+		range(0, image.getHeight() * w)
+			.filter(idx -> image.getRGB(idx % w, idx / w) == COLOR_START_UP ? draw(idx % w, idx / w, image, Direction.UP) : true)
+			.filter(idx -> image.getRGB(idx % w, idx / w) == COLOR_START_LEFT ? draw(idx % w, idx / w, image, Direction.LEFT) : true)
+			.boxed()
+			.collect(toList())
+			.stream()
+			.filter(idx -> image.getRGB(idx % w, idx / w) != COLOR_RED )
+			.forEach(idx -> image.setRGB(idx % w, idx / w, (random() > 0.02 ? COLOR_SKY : COLOR_SNOW)));
 			
-		allPixels.stream().filter(pixel -> pixel.color != COLOR_RED)
-			.forEach(pixel -> image.setRGB(pixel.x, pixel.y, COLOR_WHITE));
-		
 		return image;
 	}
-	
-	private static void draw(Pixel p, List<Pixel> allPixels, BufferedImage bufferedImage, Direction direction){
-		bufferedImage.setRGB(p.x, p.y, COLOR_RED);
-		p.color = COLOR_RED;
+
+	private static boolean draw(int x, int y, BufferedImage bufferedImage, Direction direction){
+		bufferedImage.setRGB(x, y, COLOR_RED);
 		
 		if(direction == Direction.STOP)
-			return;
+			return false;
 		
-		allPixels.stream().filter(pixel -> (pixel.x == direction.newX(p.x) && pixel.y == direction.newY(p.y)))
-			.limit(1)
-			.forEach(pixel -> draw(pixel, allPixels, bufferedImage, direction(pixel.color, direction)));
+		int newX = direction.newX(x);
+		int newY = direction.newY(y);
+		
+		return draw(newX, newY, bufferedImage, direction(bufferedImage.getRGB(newX, newY), direction));
 	}
 	
 	private static Direction direction(int color, Direction currentDirection){
@@ -104,19 +101,4 @@ public class WunderPahkina {
 			return currentY + changeY;
 		}
 	};
-	
-	public static class Pixel {
-		public int x, y, color;
-
-		public Pixel(int x, int y, int color) {
-			super();
-			this.x = x;
-			this.y = y;
-			this.color = color;
-		}
-		
-		public Integer color() {
-			return color;
-		}
-	}
 }
