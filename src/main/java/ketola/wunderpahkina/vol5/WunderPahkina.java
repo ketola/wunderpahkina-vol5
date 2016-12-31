@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
@@ -24,15 +25,19 @@ public class WunderPahkina {
 	private static final Integer COLOR_STOP = new Color(51, 69, 169).getRGB(); 
 	private static final Integer COLOR_TURN_RIGHT = new Color(182, 149, 72).getRGB(); 
 	private static final Integer COLOR_TURN_LEFT = new Color(123, 131, 154).getRGB(); 
+	private static final Integer SCALE = 3;
 
 	public static void main(String[] args) throws Exception {
 		long time = currentTimeMillis();
 		
-		ImageIO.write(processImage(ImageIO.read(new File("src/main/resources/kuva.png"))), "png", new File("src/main/resources/solution.png"));
+		BufferedImage solved = processImage(ImageIO.read(new File("src/main/resources/kuva.png")));
+		BufferedImage scaled = scaleImage(solved);
+		
+		ImageIO.write(scaled, "png", new File("src/main/resources/solution.png"));
 		
 		System.out.println(format("The result is saved to src/main/resources/solution.png. The operation took %d ms.", currentTimeMillis() - time));
 	}
-	
+
 	public static BufferedImage processImage(BufferedImage image) {
 		int w = image.getWidth();
 		
@@ -101,4 +106,15 @@ public class WunderPahkina {
 			return currentY + changeY;
 		}
 	};
+	
+	private static BufferedImage scaleImage(BufferedImage solved) {
+		BufferedImage scaled = new BufferedImage(SCALE * solved.getWidth(null),
+				SCALE * solved.getHeight(null),
+                BufferedImage.TYPE_INT_ARGB);
+		Graphics2D grph = (Graphics2D) scaled.getGraphics();
+        grph.scale(SCALE, SCALE);
+        grph.drawImage(solved, 0, 0, null);
+        grph.dispose();
+		return scaled;
+	}
 }
