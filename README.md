@@ -14,5 +14,6 @@ https://github.com/ketola/wunderpahkina-vol5/blob/master/src/main/java/ketola/wu
 
 ..and this is the result after running the code:
 
-![Alt](https://raw.githubusercontent.com/ketola/wunderpahkina-vol5/master/src/main/resources/solution.png "the Solution")
+<img src="https://raw.githubusercontent.com/ketola/wunderpahkina-vol5/master/src/main/resources/solution.png" 
+alt="The Solution" width="540" height="180" />
 
